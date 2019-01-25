@@ -21,11 +21,12 @@ public class PaymentOptionService {
     @Autowired
     SummaryService summaryService;
     private static final String cod = "COD";
+    private static final float codBase = 50000;
     private static final float emiBase=3000;
     private static final String emi="EMI";
 
       //Controller Function
-    public ResponseEntity<Response> getOptions(CheckOut checkOut)
+    public ResponseEntity<CustomResponse> getOptions(CheckOut checkOut)
     {
           List<String> productIds = checkOut.getProductsId();
           List<Integer> qty = checkOut.getQuantity();
@@ -35,14 +36,14 @@ public class PaymentOptionService {
 
           List<String> paymentOptions=getPaymentOption(productIds,amount);
           Summary summary = new Summary(orderId,null,null,null,amount,null);
-          summaryService.Save(summary);
+          summaryService.save(summary);
           Response response = new Response();
           response.options=paymentOptions;
           response.orderId = orderId;
-          return new ResponseEntity<>(response,HttpStatus.OK);
+          return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200,"OK",response));
     }
     // Controller Function
-    public ResponseEntity<Response> validate(PaymentOptionSelected paymentOptionSelected)
+    public ResponseEntity<CustomResponse> validate(PaymentOptionSelected paymentOptionSelected)
     {
         float amount = summaryService.getAmount(paymentOptionSelected.orderId);
         String optionSelected = paymentOptionSelected.optionSelected;
@@ -59,18 +60,19 @@ public class PaymentOptionService {
         {
             temp.add(optionSelected);
             response.options =temp;
-            return new ResponseEntity<>(response,HttpStatus.OK);
+            Summary summary=new Summary(paymentOptionSelected.orderId,optionSelected,null,null,amount,null);
+            summaryService.save(summary);
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200,"OK",response));
         }
-       temp.add("You have selected an incorrect option");
-       response.options=temp;
-        return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
+
+        return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(400,"You have selected an incorrect option",new Response()));
     }
 
      //
     public List<String> getPaymentOption(List<String>productIds,float amount)
     {
         List<String> paymentOptions=paymentOptionRepo.getOptions();
-        if(hasCOD(paymentOptions)&& codNotAvailable(productIds))
+        if(hasCOD(paymentOptions)&& (codNotAvailable(productIds)||codBase<amount))
         {
             paymentOptions.remove(cod);
         }
