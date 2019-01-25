@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import paymentmicroservice.Models.*;
 import paymentmicroservice.Repository.BankAvailableRepo;
 import paymentmicroservice.Repository.SummaryRepo;
+import paymentmicroservice.Validation.BasicValidation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +20,26 @@ public class BankAvailableService {
     BankAvailableRepo bankAvailableRepo;
     @Autowired
     SummaryService summaryService;
+    @Autowired
+    BasicValidation basicValidation;
     public ResponseEntity<CustomResponse> getBanks(Order order)
     {
-        Response response=new Response();
-        if(!validateNetbanking(order.orderId))
-           return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404,"You have not selected NetBanking",new Response()));
-        response.options=bankAvailableRepo.getAllBankS();
-        response.orderId =order.orderId;
-        return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200,"OK",response));
+        try {
+            Response response = new Response();
+            if (!(basicValidation.validateString(order.orderId) && validateNetbanking(order.orderId)))
+                return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "You have not selected NetBanking", new Response()));
+            response.options = bankAvailableRepo.getAllBankS();
+            if(response.options==null)
+                throw new NullPointerException();
+            response.orderId = order.orderId;
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200, "OK", response));
+        }
+        catch (NullPointerException e){
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "Not Able to fetch details", new Response()));
+        }
+        catch (Exception e){
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "Something Went Wrong", new Response()));
+        }
     }
 
     public boolean validateNetbanking(String orderId)
@@ -43,19 +56,23 @@ public class BankAvailableService {
 
     public ResponseEntity<CustomResponse> validateBank(PaymentOptionSelected paymentOptionSelected)
     {
-        Response response=new Response();
-        if(!validateNetbanking(paymentOptionSelected.orderId))
-           return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404,"You have not selected NetBanking",new Response()));
-        response.orderId=paymentOptionSelected.orderId;
-        BankAvailable bankAvailable=bankAvailableRepo.findByName(paymentOptionSelected.optionSelected);
-        List<String> temp = new ArrayList<>();
-        if(bankAvailable==null)
-        {
-           return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404,"Please select from the given options",new Response()));
+        try {
+            Response response = new Response();
+            if (!(basicValidation.validateString(paymentOptionSelected.orderId) && validateNetbanking(paymentOptionSelected.orderId)))
+                return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "You have not selected NetBanking", new Response()));
+            response.orderId = paymentOptionSelected.orderId;
+            BankAvailable bankAvailable = bankAvailableRepo.findByName(paymentOptionSelected.optionSelected);
+            List<String> temp = new ArrayList<>();
+            if (bankAvailable == null) {
+                return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "Please select from the given options", new Response()));
+            }
+            temp.add(paymentOptionSelected.optionSelected);
+            response.options = temp;
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200, "Ok", response));
         }
-        temp.add(paymentOptionSelected.optionSelected);
-        response.options=temp;
-       return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200,"Ok",response));
+        catch (NullPointerException e){
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "Something Went Wrong", new Response()));
+        }
     }
 
 
