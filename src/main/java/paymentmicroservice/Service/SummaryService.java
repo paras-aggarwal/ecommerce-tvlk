@@ -8,6 +8,7 @@ import paymentmicroservice.Models.CustomResponse;
 import paymentmicroservice.Models.Order;
 import paymentmicroservice.Models.Summary;
 import paymentmicroservice.Repository.SummaryRepo;
+import paymentmicroservice.Validation.BasicValidation;
 
 import java.util.Date;
 import java.util.Optional;
@@ -19,10 +20,12 @@ public class SummaryService {
     SummaryRepo summaryRepo;
     @Autowired
     MerchantService merchantService;
+    @Autowired
+    BasicValidation basicValidation;
 
-    public void save(Summary summary)
+    public Summary save(Summary summary)
     {
-         summaryRepo.save(summary);
+         return summaryRepo.save(summary);
     }
 
     public float getAmount(String orderId)
@@ -49,20 +52,30 @@ public class SummaryService {
 
     public ResponseEntity<CustomResponse> finalPay(Order order)
     {
-        String TranstionId = merchantService.getTransctionId();
-        Date date = merchantService.getDate();
-        String status = merchantService.getStatus();
-        Optional optional = getSummary(order.orderId);
-        if(optional.isPresent()) {
-            Summary summary=(Summary) optional.get();
-            summary.setTransactionId(TranstionId);
-            summary.setDate(date);
-            summary.setSuccess(status);
-            save(summary);
-            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200,"OK",null));
+        try {
+            String TranstionId = merchantService.getTransctionId();
+            Date date = merchantService.getDate();
+            String status = merchantService.getStatus();
+            if (basicValidation.validateString(order.orderId)) {
+                Optional optional = getSummary(order.orderId);
+                if (optional.isPresent()) {
+                    Summary summary = (Summary) optional.get();
+                    summary.setTransactionId(TranstionId);
+                    summary.setDate(date);
+                    summary.setSuccess(status);
+                    summary=save(summary);
+                    if(summary==null)
+                        throw new NullPointerException();
+                    return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200, "OK", null));
+
+                }
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "Not able to save data", null));
+        }
+        catch (NullPointerException e) {
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "Not able to save data", null));
 
         }
-        return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404,"Not able to save data",null));
 
     }
 }

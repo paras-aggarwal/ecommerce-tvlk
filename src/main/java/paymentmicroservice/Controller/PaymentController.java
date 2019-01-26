@@ -1,13 +1,11 @@
 package paymentmicroservice.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import paymentmicroservice.Models.*;
-import paymentmicroservice.Service.BankAvailableService;
-import paymentmicroservice.Service.CardDetailService;
-import paymentmicroservice.Service.PaymentOptionService;
-import paymentmicroservice.Service.SummaryService;
+import paymentmicroservice.Service.*;
 
 
 @RestController
@@ -21,16 +19,19 @@ public class PaymentController {
     SummaryService summaryService;
     @Autowired
     CardDetailService cardDetailService;
+    @Autowired
+    CancelOrderService cancelOrderService;
 
     @RequestMapping(method = RequestMethod.POST,value = "/checkout")
-    public ResponseEntity<CustomResponse> checkOut(@RequestBody CheckOut checkOut)
+    public ResponseEntity<CustomResponse> checkOut(@RequestBody Order order)
     {
-        return paymentOptionService.getOptions(checkOut);
+        return paymentOptionService.getOptions(order);
     }
 
     @RequestMapping(method = RequestMethod.POST,value = "/payment")
     public ResponseEntity<CustomResponse> payment(@RequestBody PaymentOptionSelected paymentOptionSelected)
     {
+
         return paymentOptionService.validate(paymentOptionSelected);
     }
 
@@ -56,6 +57,12 @@ public class PaymentController {
     public  ResponseEntity<CustomResponse> finalPay(@RequestBody Order order)
     {
         return  summaryService.finalPay(order);
+    }
+
+    @RequestMapping(method = RequestMethod.POST,value = "/payment/cancel")
+    public ResponseEntity<CustomResponse> cancel(@RequestBody Order order)
+    {
+       return cancelOrderService.cancelOrder(order);
     }
 
 }

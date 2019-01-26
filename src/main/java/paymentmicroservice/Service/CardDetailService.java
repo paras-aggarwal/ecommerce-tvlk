@@ -26,24 +26,29 @@ public class CardDetailService {
     CardDetailRepo cardDetailRepo;
     public ResponseEntity<CustomResponse> validateCard(CardDetail cardDetail)
     {
-        boolean status=false;
-        if(cardDetail.getCardType().equalsIgnoreCase("CreditCard"))
-            status=cardValidation.validateCreditCard(cardDetail);
-        if(cardDetail.getCardType().equalsIgnoreCase("DebitCard"))
-            status=cardValidation.validateDebitCard(cardDetail);
-        Response response=new Response();
-        List<String> temp=new ArrayList<>();
-        Optional op=summaryService.getSummary(cardDetail.getOrderId());
-        if(op.isPresent()) {
-             Summary summary=(Summary) op.get();
-            if (status && (summary.getModOfPayment().equalsIgnoreCase("CreditCard") || summary.getModOfPayment().equalsIgnoreCase("DebiCard"))) {
-                temp.add("data Saved Successfully");
-                response.orderId = cardDetail.getOrderId();
-                response.options = temp;
-                cardDetailRepo.save(cardDetail);
-                return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200, "OK", response));
+        try {
+            boolean status = false;
+            if (cardDetail.getCardType().equalsIgnoreCase("CreditCard"))
+                status = cardValidation.validateCreditCard(cardDetail);
+            if (cardDetail.getCardType().equalsIgnoreCase("DebitCard"))
+                status = cardValidation.validateDebitCard(cardDetail);
+            Response response = new Response();
+            List<String> temp = new ArrayList<>();
+            Optional op = summaryService.getSummary(cardDetail.getOrderId());
+            if (op.isPresent()) {
+                Summary summary = (Summary) op.get();
+                if (status && (summary.getModOfPayment().equalsIgnoreCase("CreditCard") || summary.getModOfPayment().equalsIgnoreCase("DebiCard"))) {
+                    temp.add("data Saved Successfully");
+                    response.orderId = cardDetail.getOrderId();
+                    response.options = temp;
+                    cardDetailRepo.save(cardDetail);
+                    return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200, "OK", response));
+                }
             }
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "Card details Invalid or OrderId", new Response()));
         }
-        return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404,"Card details Invalid or OrderId",new Response()));
+        catch (NullPointerException nullException) {
+            return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "Data Not Found", new Response()));
+        }
     }
 }
