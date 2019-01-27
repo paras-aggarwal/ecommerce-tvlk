@@ -39,7 +39,7 @@ public class CancelOrderService {
                     if(cancelOrderRepo.findById(order.orderId).isPresent())
                         return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "Cancellation is already initiated !", null));
                     long diffInDays = (int) (new Date().getTime() - summary.getDate().getTime()) / (1000 * 60 * 60 * 24);
-                    if (diffInDays <= days && !summary.getModOfPayment().equalsIgnoreCase("COD")) {
+                    if (diffInDays <= days && !summary.getModOfPayment().equalsIgnoreCase("COD")&&summary.getStatus().equalsIgnoreCase("Success")) {
                         CancelOrder cancelOrder = new CancelOrder(order.orderId, new Date(), "Initiated");
                         cancelOrder = cancelOrderRepo.save(cancelOrder);
                         if (cancelOrder == null)
