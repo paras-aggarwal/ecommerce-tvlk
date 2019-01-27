@@ -38,7 +38,7 @@ public class PaymentController {
         return paymentOptionService.validate(paymentOptionSelected);
     }
 
-    @RequestMapping(method = RequestMethod.GET,value = "/payment/netbanking")
+    @RequestMapping(method = RequestMethod.POST,value = "/payment/netbanking")
     public ResponseEntity<CustomResponse> netBanking(@RequestBody Order order)
     {
         if(summaryService.validateOrderId(order.orderId))
@@ -46,7 +46,7 @@ public class PaymentController {
        return bankAvailableService.getBanks(order);
     }
 
-    @RequestMapping(method = RequestMethod.POST,value = "/payment/netbanking")
+    @RequestMapping(method = RequestMethod.POST,value = "/payment/netbanking/data")
     public  ResponseEntity<CustomResponse>  getBankName(@RequestBody PaymentOptionSelected paymentOptionSelected)
     {
         if(summaryService.validateOrderId(paymentOptionSelected.orderId))
@@ -62,7 +62,7 @@ public class PaymentController {
         return cardDetailService.validateCard(cardDetail);
     }
 
-    @RequestMapping(method = RequestMethod.GET ,value = "/payment/pay")
+    @RequestMapping(method = RequestMethod.POST ,value = "/payment/pay")
     public  ResponseEntity<CustomResponse> finalPay(@RequestBody Order order)
     {
         if(summaryService.validateOrderId(order.orderId))
@@ -74,6 +74,12 @@ public class PaymentController {
     public ResponseEntity<CustomResponse> cancel(@RequestBody Order order)
     {
        return cancelOrderService.cancelOrder(order);
+    }
+
+    @RequestMapping(method = RequestMethod.GET,value = "/payment/testing")
+    public ResponseEntity<CustomResponse> test()
+    {
+        return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404,"Payment has already been made",null));
     }
 
 }
