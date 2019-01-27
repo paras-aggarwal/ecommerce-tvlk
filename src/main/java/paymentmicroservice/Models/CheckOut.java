@@ -1,11 +1,14 @@
 package paymentmicroservice.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CheckOut {
     private    String orderId;
-    private List<String> productsId;
-    private List<Integer> quantity;
+    private List<String> productIds;
     private float amount;
 
     public String getOrderId() {
@@ -16,20 +19,12 @@ public class CheckOut {
         this.orderId = orderId;
     }
 
-    public List<String> getProductsId() {
-        return productsId;
+    public List<String> getProductIds() {
+        return productIds;
     }
 
-    public void setProductsId(List<String> productsId) {
-        this.productsId = productsId;
-    }
-
-    public List<Integer> getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(List<Integer> quantity) {
-        this.quantity = quantity;
+    public void setProductIds(List<String> productIds) {
+        this.productIds = productIds;
     }
 
     public float getAmount() {

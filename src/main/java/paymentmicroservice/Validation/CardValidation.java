@@ -13,7 +13,7 @@ public class CardValidation {
 
     public boolean validateDebitCard(CardDetail cardDetail)
     {
-        if(cardDetail.getCardNumber().length()==16&&validateCvv(cardDetail.getCvv())&&validateExpiry(cardDetail.getExpiryDate()))
+        if(validateInitialCardDigit(cardDetail.getCardNumber())&&validateCvv(cardDetail.getCvv())&&validateExpiry(cardDetail.getExpiryDate()))
             return true;
         return false;
     }
@@ -85,5 +85,17 @@ public class CardValidation {
             return true;
         else
             return false;
+    }
+    public  boolean validateInitialCardDigit(String cardNumber){
+        if(cardNumber.length()!=16)
+            return false;
+        if(!(cardNumber.charAt(0)>='1'&&cardNumber.charAt(0)<='9'))
+            return false;
+        for(int i=1;i<16;i++){
+            if(!(cardNumber.charAt(i)>='0'&&cardNumber.charAt(i)<='9'))
+                return false;
+        }
+        return true;
+
     }
 }

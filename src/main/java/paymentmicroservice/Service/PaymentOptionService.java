@@ -1,5 +1,8 @@
 package paymentmicroservice.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -37,7 +40,7 @@ public class PaymentOptionService {
                 return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(400, "OrderId is not Valid", null));
             }
             CheckOut checkOut = getAllDetails(orderId);
-            List<String> productIds = checkOut.getProductsId();
+            List<String> productIds = checkOut.getProductIds();
             float amount = checkOut.getAmount();
             if (!(basicValidation.validateAmount(amount) && basicValidation.validateList(productIds))) {
                 return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(400, "Incomsistent Data", null));
@@ -66,8 +69,8 @@ public class PaymentOptionService {
             if ((basicValidation.validateString(orderId) && basicValidation.validateString(optionSelected))) {
                 float amount = summaryService.getAmount(paymentOptionSelected.orderId);
                 CheckOut checkOut = getAllDetails(orderId);
-                List<String> productIds = checkOut.getProductsId();
-                if (basicValidation.validateList(productIds)) {
+                List<String> productIds = checkOut.getProductIds();
+                if (basicValidation.validateList(productIds)&&basicValidation.validateAmount(amount)) {
                     List<String> paymentOptions = getPaymentOption(productIds, amount);
                     List<String> temp = new ArrayList<>();
                     Response response = new Response();
@@ -128,19 +131,38 @@ public class PaymentOptionService {
 
     public CheckOut getAllDetails(String orderId)
     {
-//        final String uri = "http://gourav9.localhost.run/updateQuantity";
-//        RestTemplate restTemplate = new RestTemplate();
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        HttpEntity<String> entity = new HttpEntity<>(orderId,headers);
-//        CheckOut checkOut= restTemplate.postForObject(uri,entity,CheckOut.class);
-        CheckOut checkOut=new CheckOut();
-        checkOut.setAmount(5001);
-        List<String> temp = new ArrayList<>();
-        temp.add("5c48c6e90278e02f5522b16d");
-        temp.add("627");
-        checkOut.setProductsId(temp);
+//        try {
+//            final String uri = "https://reqres.in/api/users?page=2";
+//            Order order = new Order();
+//            order.orderId = orderId;
+//            RestTemplate restTemplate = new RestTemplate();
+//            HttpHeaders headers = new HttpHeaders();
+//            System.out.println("sdfgh");
+//            headers.setContentType(MediaType.APPLICATION_JSON);
+//           // HttpEntity<String> entity = new HttpEntity<>(order.orderId);
+//            String response = restTemplate.getForObject(uri,String.class);
+//            JSONObject obj = new JSONObject(response);
+//            System.out.println("sdfghj"+response);
+//            JSONArray arr = obj.getJSONArray("data");
+//            System.out.println(arr);
+//            ObjectMapper mapper = new ObjectMapper();
+//           for (int i = 0; i < arr.length(); i++) {
+//                CheckOut checkOut= mapper.readValue(arr.getJSONObject(i).toString(),CheckOut.class);
+//                System.out.println(checkOut.getProductIds());
+//            }
+//            return new CheckOut();
+//        }
+//        catch (Exception e){
+//            return new CheckOut();
+//        }
+        CheckOut checkOut =new CheckOut();
+        List<String> temp=new ArrayList<>();
+        temp.add("1");
+        checkOut.setProductIds(temp);
+        checkOut.setAmount(839828);
         return checkOut;
+
+
     }
 
 

@@ -1,5 +1,9 @@
 package paymentmicroservice.Models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+
 public class CustomResponse<ResponseData> {
     private int statusCode;
     private String message;
