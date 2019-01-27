@@ -28,19 +28,19 @@ public class CancelOrderService {
     CancelOrderRepo cancelOrderRepo;
     private static final int  days= 10;
 
-    public ResponseEntity<CustomResponse> cancelOrder(Order order){
+    public ResponseEntity<CustomResponse> cancelOrder(String orderId){
         try {
-            if (order == null || !basicValidation.validateString(order.orderId))
+            if (orderId == null || !basicValidation.validateString(orderId))
                 return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "order id is null", null));
-            Optional optional = summaryService.getSummary(order.orderId);
+            Optional optional = summaryService.getSummary(orderId);
             if (optional.isPresent()) {
                 Summary summary = (Summary) optional.get();
                 if (summary.getDate() != null) {
-                    if(cancelOrderRepo.findById(order.orderId).isPresent())
+                    if(cancelOrderRepo.findById(orderId).isPresent())
                         return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "Cancellation is already initiated !", null));
                     long diffInDays = (int) (new Date().getTime() - summary.getDate().getTime()) / (1000 * 60 * 60 * 24);
                     if (diffInDays <= days && !summary.getModOfPayment().equalsIgnoreCase("COD")&&summary.getStatus().equalsIgnoreCase("Success")) {
-                        CancelOrder cancelOrder = new CancelOrder(order.orderId, new Date(), "Initiated");
+                        CancelOrder cancelOrder = new CancelOrder(orderId, new Date(), "Initiated");
                         cancelOrder = cancelOrderRepo.save(cancelOrder);
                         if (cancelOrder == null)
                             throw new NullPointerException();

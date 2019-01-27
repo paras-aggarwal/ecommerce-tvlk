@@ -131,39 +131,27 @@ public class PaymentOptionService {
 
     public CheckOut getAllDetails(String orderId)
     {
-//        try {
-//            final String uri = "https://reqres.in/api/users?page=2";
-//            Order order = new Order();
-//            order.orderId = orderId;
-//            RestTemplate restTemplate = new RestTemplate();
-//            HttpHeaders headers = new HttpHeaders();
-//            System.out.println("sdfgh");
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-//           // HttpEntity<String> entity = new HttpEntity<>(order.orderId);
-//            String response = restTemplate.getForObject(uri,String.class);
-//            JSONObject obj = new JSONObject(response);
-//            System.out.println("sdfghj"+response);
-//            JSONArray arr = obj.getJSONArray("data");
-//            System.out.println(arr);
-//            ObjectMapper mapper = new ObjectMapper();
-//           for (int i = 0; i < arr.length(); i++) {
-//                CheckOut checkOut= mapper.readValue(arr.getJSONObject(i).toString(),CheckOut.class);
-//                System.out.println(checkOut.getProductIds());
-//            }
-//            return new CheckOut();
-//        }
-//        catch (Exception e){
-//            return new CheckOut();
-//        }
-        CheckOut checkOut =new CheckOut();
-        List<String> temp=new ArrayList<>();
-        temp.add("1");
-        checkOut.setProductIds(temp);
-        checkOut.setAmount(839828);
-        return checkOut;
+        try {
+            final String uri = "http://d034eb08.ngrok.io/orderDetails/"+orderId;
+            Order order = new Order();
+            order.orderId = orderId;
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> entity = new HttpEntity<>(order.orderId);
+            String response = restTemplate.getForObject(uri,String.class);
+            JSONObject obj = new JSONObject(response);
+            JSONObject arr = obj.getJSONObject("responseData");
+            ObjectMapper mapper = new ObjectMapper();
+            CheckOut checkOut = mapper.readValue(arr.toString(),CheckOut.class);
+            System.out.println(checkOut.getProductIds());
+            return checkOut;
 
+        }
+        catch (Exception e){
+            return new CheckOut();
+        }
 
     }
-
 
 }

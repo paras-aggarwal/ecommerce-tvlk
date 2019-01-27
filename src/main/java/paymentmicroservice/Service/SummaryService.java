@@ -1,5 +1,7 @@
 package paymentmicroservice.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -71,6 +73,7 @@ public class SummaryService {
     {
         try {
 
+            System.out.println("yha aaya");
             String TranstionId = merchantService.getTransctionId();
             Date date = merchantService.getDate();
             String status = merchantService.getStatus();
@@ -87,7 +90,7 @@ public class SummaryService {
                     if(summary!=null&&sendResponse(summary))
                         return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(200, "OK", null));
                     else{
-                        cancelOrderService.cancelOrder(order);
+                        cancelOrderService.cancelOrder(order.orderId);
                         summary.setSuccess("Refund Initiated");
                         summary=save(summary);
                         return ResponseEntity.status(HttpStatus.OK).body(new CustomResponse(404, "Payment failed!", null));
@@ -107,19 +110,27 @@ public class SummaryService {
 
     public boolean sendResponse(Summary summary)
     {
-        final String uri = "http://gourav9.localhost.run/updateQuantity";
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Summary> entity = new HttpEntity<>(summary,headers);
         try {
-            ResponseEntity<CustomResponse> customResponse = restTemplate.postForObject(uri, entity, ResponseEntity.class);
-            if (customResponse.getBody().getStatusCode() == 200) {
+            final String uri = "http://d034eb08.ngrok.io/orderConfirmation";
+            RestTemplate restTemplate = new RestTemplate();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Summary> entity = new HttpEntity<>(summary,headers);
+            String response = restTemplate.postForObject(uri, entity, String.class);
+            System.out.println(response);
+            JSONObject obj = new JSONObject(response);
+            int statusCode = obj.getInt("statusCode");
+
+            ObjectMapper mapper = new ObjectMapper();
+
+            System.out.println(statusCode);
+            if(statusCode==200)
                 return true;
-            }
             return false;
+
         }
-        catch (Exception e) {
+        catch (Exception e){
+            System.out.println(e);
             return false;
         }
 

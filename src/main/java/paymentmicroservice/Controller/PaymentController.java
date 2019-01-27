@@ -70,10 +70,10 @@ public class PaymentController {
         return  summaryService.finalPay(order);
     }
 
-    @RequestMapping(method = RequestMethod.POST,value = "/payment/cancel")
-    public ResponseEntity<CustomResponse> cancel(@RequestBody Order order)
+    @RequestMapping(method = RequestMethod.GET,value = "/payment/cancel/{orderId}")
+    public ResponseEntity<CustomResponse> cancel(@PathVariable String orderId)
     {
-       return cancelOrderService.cancelOrder(order);
+       return cancelOrderService.cancelOrder(orderId);
     }
 
 }
